@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TokenPilot — Manage Tokens. Transfer AI Chats. Stay in Control.</title>
+  <meta name="description" content="TokenPilot counts tokens, scores your prompts, and lets you export any AI chat to continue on another platform — in seconds." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Reset & Base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #16161f;
+      --border: rgba(124, 58, 237, 0.2);
+      --purple: #7c3aed;
+      --purple-light: #a78bfa;
+      --cyan: #22d3ee;
+      --green: #4ade80;
+      --red: #f87171;
+      --text: #f1f0ff;
+      --text-muted: #8b8ba0;
+      --text-dim: #55556a;
+      --font: 'Inter', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ─── Utility ────────────────────────────────────────────── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .section { padding: 100px 0; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.35);
+      border-radius: 9999px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin-bottom: 60px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--purple-light), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ─── Glass Card ─────────────────────────────────────────── */
+    .glass {
+      background: rgba(17, 17, 24, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .glass:hover {
+      border-color: rgba(124,58,237,0.5);
+      box-shadow: 0 0 30px rgba(124,58,237,0.12), 0 0 60px rgba(124,58,237,0.06);
+    }
+
+    /* ─── Buttons ────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), #6d28d9);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(124,58,237,0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(124,58,237,0.55);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn-ghost:hover {
+      border-color: rgba(255,255,255,0.25);
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* ─── Navbar ─────────────────────────────────────────────── */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(124,58,237,0.1);
+      transition: transform 0.4s ease;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-logo span {
+      background: linear-gradient(135deg, var(--purple-light), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--purple);
+      color: #fff !important;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600 !important;
+      font-size: 13px !important;
+    }
+    .nav-cta:hover { background: #6d28d9 !important; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+    }
+
+    /* ─── HERO ───────────────────────────────────────────────── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 64px;
+      overflow: hidden;
+    }
+
+    #particle-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 500px;
+      background: radial-gradient(ellipse at center, rgba(124,58,237,0.18) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 6vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+
+    .hero-btns {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    /* Token counter */
+    .token-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(17,17,24,0.8);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+      backdrop-filter: blur(12px);
+    }
+
+    .counter-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--purple-light);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .counter-dot {
+      width: 8px; height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    /* Browser logos row */
+    .browser-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .browser-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.45;
+      transition: opacity 0.2s;
+    }
+    .browser-item:hover { opacity: 0.8; }
+
+    .browser-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .browser-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    /* Scroll arrow */
+    .scroll-arrow {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.4;
+      animation: bounce-down 2s ease-in-out infinite;
+    }
+
+    .scroll-arrow span { display: block; width: 20px; height: 2px; background: var(--text-muted); }
+    .scroll-arrow span:first-child { transform: rotate(45deg) translate(4px, 4px); }
+    .scroll-arrow span:last-child { transform: rotate(-45deg) translate(-4px, 4px); }
+
+    @keyframes bounce-down {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ─── SECTION 2: PROBLEM ─────────────────────────────────── */
+    #problem { background: var(--surface); }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .problem-card {
+      padding: 28px;
+      border-radius: 16px;
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .problem-card:hover {
+      border-color: rgba(124,58,237,0.3);
+      transform: translateY(-4px);
+    }
+
+    .problem-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+
+    .problem-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .solution-text {
+      font-size: 13px;
+      color: var(--green);
+      font-weight: 500;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    /* ─── SECTION 3: FEATURES ────────────────────────────────── */
+    #features {}
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      padding: 28px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      cursor: default;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(124,58,237,0.5);
+      box-shadow: 0 0 40px rgba(124,58,237,0.15), 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .feature-icon-wrap {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 18px;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ─── SECTION 4: TRANSFER ANIMATION ─────────────────────── */
+    #transfer { background: var(--surface); overflow: hidden; }
+
+    .transfer-diagram {
+      position: relative;
+      margin-top: 60px;
+    }
+
+    .transfer-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 20px 0;
+    }
+
+    .transfer-node {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .transfer-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      min-width: 90px;
+      transition: border-color 0.3s;
+    }
+
+    .transfer-box.highlight {
+      background: rgba(124,58,237,0.12);
+      border-color: rgba(124,58,237,0.5);
+      color: var(--purple-light);
+    }
+
+    .transfer-box.file {
+      background: rgba(34,211,238,0.08);
+      border-color: rgba(34,211,238,0.3);
+      color: var(--cyan);
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+    }
+
+    .transfer-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .transfer-arrow {
+      flex-shrink: 0;
+      width: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .transfer-arrow::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      border-radius: 2px;
+    }
+
+    .transfer-arrow::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      border-radius: 2px;
+      animation: flow-right 1.5s ease-in-out infinite;
+    }
+
+    @keyframes flow-right {
+      0% { left: -24px; opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { left: calc(100% + 24px); opacity: 0; }
+    }
+
+    .arrow-head {
+      position: absolute;
+      right: 4px;
+      width: 0; height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 7px solid var(--cyan);
+    }
+
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin-top: 40px;
+    }
+
+    .platform-chip {
+      background: var(--surface2);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .platform-chip:hover {
+      border-color: rgba(124,58,237,0.4);
+      color: var(--purple-light);
+      background: rgba(124,58,237,0.08);
+    }
+
+    /* Popup mockup */
+    .popup-mockup {
+      width: 280px;
+      margin: 48px auto 0;
+      background: var(--surface2);
+      border: 1px solid rgba(124,58,237,0.35);
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 13px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(124,58,237,0.1);
+    }
+
+    .popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .popup-logo {
+      font-weight: 800;
+      font-size: 14px;
+      background: linear-gradient(135deg, var(--purple-light), var(--cyan));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .popup-counter {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .popup-counter strong {
+      color: var(--purple-light);
+    }
+
+    .popup-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .popup-row span:first-child { color: var(--text-dim); }
+    .popup-row span:last-child { color: var(--text-muted); font-weight: 600; }
+
+    .popup-export-btn {
+      width: 100%;
+      margin-top: 14px;
+      padding: 10px;
+      background: linear-gradient(135deg, var(--purple), #6d28d9);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    /* ─── SECTION 5: BENCHMARKS ──────────────────────────────── */
+    #benchmarks {}
+
+    .benchmark-list {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      max-width: 640px;
+    }
+
+    .benchmark-item { }
+
+    .benchmark-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .benchmark-label {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .benchmark-pct {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--purple-light);
+    }
+
+    .benchmark-track {
+      height: 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .benchmark-fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .benchmark-note {
+      margin-top: 32px;
+      padding: 14px 18px;
+      background: rgba(34,211,238,0.06);
+      border: 1px solid rgba(34,211,238,0.2);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--cyan);
+      max-width: 640px;
+    }
+
+    /* ─── SECTION 6: COMPARISON ──────────────────────────────── */
+    #comparison { background: var(--surface); }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 14px 16px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .comparison-table th {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--surface2);
+    }
+
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      text-align: left;
+      padding-left: 20px;
+    }
+
+    .comparison-table tr:hover td {
+      background: rgba(255,255,255,0.015);
+    }
+
+    .comparison-table .tp-row td {
+      background: rgba(124,58,237,0.06);
+    }
+    .comparison-table .tp-row td:first-child {
+      font-weight: 700;
+      color: var(--purple-light);
+    }
+
+    .check { color: var(--green); font-size: 16px; }
+    .cross { color: var(--red); font-size: 14px; opacity: 0.7; }
+    .partial { color: #f59e0b; font-size: 13px; }
+
+    .privacy-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 32px;
+      background: rgba(74,222,128,0.08);
+      border: 1px solid rgba(74,222,128,0.25);
+      border-radius: 9999px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    /* ─── SECTION 7: CTA ─────────────────────────────────────── */
+    #cta { text-align: center; padding: 120px 0; }
+
+    .cta-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+
+    .cta-sub {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+
+    .cta-btns {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    /* Pulse animation on CTA button */
+    .btn-pulse {
+      position: relative;
+    }
+    .btn-pulse::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      opacity: 0;
+      z-index: -1;
+      animation: pulse-ring 2s ease-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { opacity: 0.6; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.3); }
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 9999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 48px;
+    }
+
+    .version-dot {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding: 32px 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-brand {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .footer-links a:hover { color: var(--text-muted); }
+
+    /* ─── Reveal animation base ──────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .section { padding: 72px 0; }
+      .transfer-row { justify-content: flex-start; }
+      .comparison-table { font-size: 12px; }
+      .comparison-table th, .comparison-table td { padding: 10px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <div class="container nav-inner">
+      <div class="nav-logo">
+        🛩 <span>TokenPilot</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#transfer">Transfer</a></li>
+        <li><a href="#benchmarks">Accuracy</a></li>
+        <li><a href="#comparison">Compare</a></li>
+        <li><a href="https://github.com/kushpatel-dev/TokenPilot" target="_blank">GitHub</a></li>
+        <li><a href="#cta" class="nav-cta">Install Free</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- SECTION 1: HERO -->
+  <section id="hero">
+    <canvas id="particle-canvas"></canvas>
+    <div class="hero-glow"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="badge">🛩 Now in Development · Beta Available</div>
+
+        <h1 class="hero-title">
+          Stop losing your<br />
+          <span class="gradient-text">AI conversations.</span><br />
+          Transfer them anywhere.
+        </h1>
+
+        <p class="hero-sub">
+          TokenPilot counts tokens, scores your prompts, and lets you export any AI chat to continue on another platform — in seconds.
+        </p>
+
+        <!-- Live token counter -->
+        <div class="token-counter">
+          <div class="counter-dot"></div>
+          <span>Live token estimate:</span>
+          <span class="counter-val" id="hero-counter">0</span>
+          <span style="color: var(--text-muted)">tokens</span>
+        </div>
+
+        <!-- CTA buttons -->
+        <div class="hero-btns">
+          <a href="#cta" class="btn btn-primary btn-pulse">
+            <span>⬇</span> Install for Chrome
+          </a>
+          <a href="https://github.com/kushpatel-dev/TokenPilot" target="_blank" class="btn btn-ghost">
+            <span>⭐</span> View on GitHub
+          </a>
+        </div>
+
+        <!-- Browser logos -->
+        <div class="browser-row">
+          <div class="browser-item">
+            <div class="browser-icon">🌐</div>
+            <span class="browser-label">Chrome</span>
+          </div>
+          <div class="browser-item">
+            <div class="browser-icon">🦊</div>
+            <span class="browser-label">Firefox</span>
+          </div>
+          <div class="browser-item">
+            <div class="browser-icon">💠</div>
+            <span class="browser-label">Edge</span>
+          </div>
+          <div class="browser-item">
+            <div class="browser-icon">🦁</div>
+            <span class="browser-label">Brave</span>
+          </div>
+          <div class="browser-item">
+            <div class="browser-icon">🧭</div>
+            <span class="browser-label">Safari</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-arrow">
+      <span></span>
+      <span></span>
+    </div>
+  </section>
+
+  <!-- SECTION 2: PROBLEM → SOLUTION -->
+  <section id="problem" class="section">
+    <div class="container">
+      <div class="badge">The Problem</div>
+      <h2 class="section-title reveal">
+        AI users lose context every time<br />they switch platforms
+      </h2>
+      <p class="section-sub reveal">Every platform resets you. TokenPilot breaks the wall.</p>
+
+      <div class="problem-grid">
+        <div class="problem-card reveal">
+          <div class="problem-icon">🚫</div>
+          <p class="problem-text">"You hit the token limit on ChatGPT mid-project"</p>
+          <p class="solution-text">✓ TokenPilot shows real-time token count so you know before you hit the limit.</p>
+        </div>
+        <div class="problem-card reveal">
+          <div class="problem-icon">📋</div>
+          <p class="problem-text">"Copy-pasting breaks formatting and loses context"</p>
+          <p class="solution-text">✓ Export as structured <code style="color: var(--cyan); font-size: 12px">.md</code> file — formatting and context fully preserved.</p>
+        </div>
+        <div class="problem-card reveal">
+          <div class="problem-icon">🔄</div>
+          <p class="problem-text">"Every AI platform is a fresh start — your history vanishes"</p>
+          <p class="solution-text">✓ Full local conversation history. Your sessions are always there.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: FEATURES -->
+  <section id="features" class="section">
+    <div class="container">
+      <div class="badge">Core Features</div>
+      <h2 class="section-title reveal">Everything an AI power-user needs</h2>
+      <p class="section-sub reveal">Five tools. One extension. Zero cloud.</p>
+
+      <div class="features-grid">
+        <div class="feature-card glass reveal">
+          <div class="feature-icon-wrap">🔢</div>
+          <h3 class="feature-title">Token Counter</h3>
+          <p class="feature-desc">Real-time token estimate shown in popup. See <strong style="color: var(--purple-light)">'4.2K tokens'</strong> before you send — never get cut off mid-thought again.</p>
+        </div>
+        <div class="feature-card glass reveal">
+          <div class="feature-icon-wrap">⭐</div>
+          <h3 class="feature-title">Prompt Scorer</h3>
+          <p class="feature-desc">AI scores your prompt quality before you send. Get better answers by knowing what makes a strong prompt.</p>
+        </div>
+        <div class="feature-card glass reveal">
+          <div class="feature-icon-wrap">🚀</div>
+          <h3 class="feature-title">Chat Transfer</h3>
+          <p class="feature-desc">Export any conversation as a structured <code style="color: var(--cyan)">.md</code> file. Open it on ChatGPT, Gemini, Claude, Perplexity and 5 more platforms instantly.</p>
+        </div>
+        <div class="feature-card glass reveal">
+          <div class="feature-icon-wrap">📚</div>
+          <h3 class="feature-title">History</h3>
+          <p class="feature-desc">Full conversation history saved locally. Browse, search, and reopen any past session — never lose context again.</p>
+        </div>
+        <div class="feature-card glass reveal" style="grid-column: auto;">
+          <div class="feature-icon-wrap">🔒</div>
+          <h3 class="feature-title">100% Private</h3>
+          <p class="feature-desc">Everything runs entirely in your browser. <strong style="color: var(--green)">Zero data sent to any server.</strong> No account required. No tracking. Ever.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: CHAT TRANSFER -->
+  <section id="transfer" class="section">
+    <div class="container">
+      <div class="badge">Chat Transfer</div>
+      <h2 class="section-title reveal">Move your entire AI conversation in one click</h2>
+      <p class="section-sub reveal">From any platform to any platform. Context intact.</p>
+
+      <!-- Flow diagram -->
+      <div class="transfer-diagram reveal">
+        <div class="transfer-row">
+          <div class="transfer-node">
+            <div class="transfer-box">ChatGPT</div>
+            <span class="transfer-label">Source</span>
+          </div>
+          <div class="transfer-arrow"><div class="arrow-head"></div></div>
+          <div class="transfer-node">
+            <div class="transfer-box highlight">TokenPilot</div>
+            <span class="transfer-label">Export</span>
+          </div>
+          <div class="transfer-arrow"><div class="arrow-head"></div></div>
+          <div class="transfer-node">
+            <div class="transfer-box file">chat.md<br /><span style="color: var(--text-dim)">etm: 4.2K tokens</span></div>
+            <span class="transfer-label">.md file</span>
+          </div>
+          <div class="transfer-arrow"><div class="arrow-head"></div></div>
+          <div class="transfer-node">
+            <div class="transfer-box highlight">Open on →</div>
+            <span class="transfer-label">Destination</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supported platforms -->
+      <div class="platforms-grid reveal">
+        <div class="platform-chip">ChatGPT</div>
+        <div class="platform-chip">Gemini</div>
+        <div class="platform-chip">Claude</div>
+        <div class="platform-chip">Perplexity</div>
+        <div class="platform-chip">Mistral</div>
+        <div class="platform-chip">DeepSeek</div>
+        <div class="platform-chip">AI Studio</div>
+        <div class="platform-chip">Copilot</div>
+        <div class="platform-chip">Arena.ai</div>
+      </div>
+
+      <!-- Popup mockup -->
+      <div class="popup-mockup reveal">
+        <div class="popup-header">
+          <span class="popup-logo">🛩 TokenPilot</span>
+          <span class="popup-counter">v3.4</span>
+        </div>
+        <div class="popup-row">
+          <span>Session tokens</span>
+          <span><strong>4,218</strong></span>
+        </div>
+        <div class="popup-row">
+          <span>Prompt score</span>
+          <span style="color: var(--green)">87 / 100</span>
+        </div>
+        <div class="popup-row">
+          <span>Messages</span>
+          <span>28</span>
+        </div>
+        <div class="popup-row">
+          <span>Platform</span>
+          <span>ChatGPT</span>
+        </div>
+        <div class="popup-export-btn">⬆ Export as .md — Transfer Chat</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: ACCURACY -->
+  <section id="benchmarks" class="section">
+    <div class="container">
+      <div class="badge">Accuracy</div>
+      <h2 class="section-title reveal">Battle-tested accuracy across chat lengths</h2>
+      <p class="section-sub reveal">Token estimation tested on real ChatGPT → Gemini transfers.</p>
+
+      <div class="benchmark-list">
+        <div class="benchmark-item reveal">
+          <div class="benchmark-header">
+            <span class="benchmark-label">Short chats (5–15 messages)</span>
+            <span class="benchmark-pct">95%</span>
+          </div>
+          <div class="benchmark-track">
+            <div class="benchmark-fill" data-target="95"></div>
+          </div>
+        </div>
+        <div class="benchmark-item reveal">
+          <div class="benchmark-header">
+            <span class="benchmark-label">Medium chats (15–30 messages)</span>
+            <span class="benchmark-pct">82%</span>
+          </div>
+          <div class="benchmark-track">
+            <div class="benchmark-fill" data-target="82"></div>
+          </div>
+        </div>
+        <div class="benchmark-item reveal">
+          <div class="benchmark-header">
+            <span class="benchmark-label">Long chats (30+ messages)</span>
+            <span class="benchmark-pct">72%</span>
+          </div>
+          <div class="benchmark-track">
+            <div class="benchmark-fill" data-target="72"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="benchmark-note reveal">
+        💡 Tested on live ChatGPT → Gemini transfer with a 30-message NovaBrew Shopify scenario
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 6: COMPARISON -->
+  <section id="comparison" class="section">
+    <div class="container">
+      <div class="badge">Compare</div>
+      <h2 class="section-title reveal">The only extension that does all of this — locally</h2>
+
+      <div style="overflow-x: auto;" class="reveal">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Extension</th>
+              <th>Token Counting</th>
+              <th>Prompt Scoring</th>
+              <th>Chat History</th>
+              <th>Cross-AI Transfer</th>
+              <th>100% Local / Private</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="tp-row">
+              <td>🛩 TokenPilot</td>
+              <td><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="check">✅</span></td>
+            </tr>
+            <tr>
+              <td>TokenScope</td>
+              <td><span class="check">✅</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="partial">~</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="partial">~</span></td>
+            </tr>
+            <tr>
+              <td>AI Token Counter</td>
+              <td><span class="check">✅</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="partial">~</span></td>
+            </tr>
+            <tr>
+              <td>Capsule Hub</td>
+              <td><span class="partial">~</span></td>
+              <td><span class="cross">✗</span></td>
+              <td><span class="check">✅</span></td>
+              <td><span class="partial">~</span></td>
+              <td><span class="cross">✗</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="privacy-badge reveal">
+        🔒 No account. No server. No tracking.
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 7: CTA -->
+  <section id="cta">
+    <div class="container">
+      <div class="badge" style="justify-content: center;">🚀 Free Forever</div>
+      <h2 class="cta-title reveal">
+        Ready to take control of<br />
+        <span class="gradient-text">your AI workflow?</span>
+      </h2>
+      <p class="cta-sub reveal">Join AI power-users who never lose context again.</p>
+
+      <div class="version-badge reveal">
+        <span class="version-dot"></span>
+        v3.4 — Latest · Active Development
+      </div>
+
+      <div class="cta-btns reveal">
+        <a href="#" class="btn btn-primary btn-pulse" style="font-size: 16px; padding: 16px 36px;">
+          ⬇ Add to Chrome — It's Free
+        </a>
+        <a href="https://github.com/kushpatel-dev/TokenPilot" target="_blank" class="btn btn-ghost">
+          ⭐ View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        🛩 <span style="background: linear-gradient(135deg, var(--purple-light), var(--cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">TokenPilot</span>
+      </div>
+      <div class="footer-links">
+        <span>Built by <a href="https://github.com/kushpatel-dev" style="color: var(--purple-light);">Kush Kaneria</a></span>
+        <a href="#">Privacy Policy</a>
+        <a href="https://github.com/kushpatel-dev/TokenPilot" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ─── Particle Canvas ────────────────────────────────────── */
+    (function () {
+      const canvas = document.getElementById('particle-canvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let W, H;
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function createParticle() {
+        return {
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 2 + 0.5,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          opacity: Math.random() * 0.5 + 0.1,
+          hue: Math.random() > 0.5 ? 270 : 190, // purple or cyan
+        };
+      }
+
+      for (let i = 0; i < 80; i++) particles.push(createParticle());
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${p.hue}, 70%, 70%, ${p.opacity})`;
+          ctx.fill();
+
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0) p.x = W;
+          if (p.x > W) p.x = 0;
+          if (p.y < 0) p.y = H;
+          if (p.y > H) p.y = 0;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ─── Hero Token Counter Count-Up ───────────────────────── */
+    (function () {
+      const el = document.getElementById('hero-counter');
+      let current = 0;
+      const target = 4218;
+      const duration = 2200;
+      const start = performance.now();
+
+      function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+      function step(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        current = Math.round(easeOut(progress) * target);
+        el.textContent = current.toLocaleString();
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    })();
+
+    /* ─── Navbar Hide on Scroll Down ────────────────────────── */
+    (function () {
+      const nav = document.getElementById('navbar');
+      let lastY = 0;
+      window.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        if (y > lastY && y > 120) {
+          nav.style.transform = 'translateY(-100%)';
+        } else {
+          nav.style.transform = 'translateY(0)';
+        }
+        lastY = y;
+      }, { passive: true });
+    })();
+
+    /* ─── Scroll Reveal (GSAP ScrollTrigger) ────────────────── */
+    document.querySelectorAll('.reveal').forEach((el, i) => {
+      gsap.fromTo(el,
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.75,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 88%',
+            toggleActions: 'play none none none',
+          },
+          delay: (i % 3) * 0.08, // slight stagger for sibling cards
+        }
+      );
+    });
+
+    /* ─── Accuracy Bars ─────────────────────────────────────── */
+    document.querySelectorAll('.benchmark-fill').forEach(bar => {
+      const target = bar.getAttribute('data-target');
+      ScrollTrigger.create({
+        trigger: bar,
+        start: 'top 85%',
+        onEnter: () => {
+          bar.style.width = target + '%';
+        },
+      });
+    });
+
+    /* ─── Feature Cards Hover Glow (additional JS layer) ────── */
+    document.querySelectorAll('.feature-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.background = `radial-gradient(300px at ${x}px ${y}px, rgba(124,58,237,0.1), rgba(17,17,24,0.7))`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.background = '';
+      });
+    });
+
+    /* ─── GSAP Hero entrance ─────────────────────────────────── */
+    gsap.from('.hero-content > *', {
+      y: 30,
+      opacity: 0,
+      duration: 0.9,
+      stagger: 0.12,
+      ease: 'power3.out',
+      delay: 0.3,
+    });
+  </script>
+</body>
+</html>
