@@ -5,61 +5,162 @@ import { gsap } from "gsap";
 
 export default function HeroSection() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  /* ── Particle canvas ── */
+  /* ── Ball pit canvas ── */
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const section = sectionRef.current;
+    if (!canvas || !section) return;
     const ctx = canvas.getContext("2d")!;
     let raf: number;
 
-    const particles: {
+    const COLORS = [
+      { h: 270, s: 70, l: 65 },
+      { h: 190, s: 80, l: 60 },
+      { h: 255, s: 60, l: 75 },
+      { h: 280, s: 65, l: 55 },
+      { h: 200, s: 75, l: 65 },
+    ];
+    const GRAVITY      = 0.22;
+    const DAMPING      = 0.72;
+    const MOUSE_RADIUS = 140;
+    const MOUSE_FORCE  = 9;
+    const BALL_COUNT   = 55;
+    const MAX_SPEED    = 18;
+
+    type Ball = {
       x: number; y: number; r: number;
-      vx: number; vy: number; opacity: number; hue: number;
-    }[] = [];
+      vx: number; vy: number;
+      color: { h: number; s: number; l: number };
+      opacity: number;
+    };
+
+    let balls: Ball[] = [];
+    let W = 0, H = 0;
+    const mouse = { x: -9999, y: -9999, active: false };
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
     };
-    resize();
-    window.addEventListener("resize", resize);
 
-    for (let i = 0; i < 80; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 2 + 0.5,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.5 + 0.1,
-        hue: Math.random() > 0.5 ? 270 : 190,
-      });
-    }
+    const createBall = (): Ball => {
+      const r = Math.random() * 10 + 8;
+      return {
+        x: Math.random() * (W - r * 2) + r,
+        y: Math.random() * H * 0.65,
+        r,
+        vx: (Math.random() - 0.5) * 3,
+        vy: (Math.random() - 0.5) * 3,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        opacity: Math.random() * 0.3 + 0.55,
+      };
+    };
+
+    const init = () => {
+      resize();
+      balls = [];
+      for (let i = 0; i < BALL_COUNT; i++) balls.push(createBall());
+    };
+
+    const resolveCollision = (a: Ball, b: Ball) => {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = a.r + b.r;
+      if (dist < minDist && dist > 0.01) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const overlap = (minDist - dist) * 0.5;
+        a.x -= nx * overlap; a.y -= ny * overlap;
+        b.x += nx * overlap; b.y += ny * overlap;
+        const dot = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+        if (dot > 0) {
+          a.vx -= dot * nx; a.vy -= dot * ny;
+          b.vx += dot * nx; b.vy += dot * ny;
+        }
+      }
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      mouse.active = true;
+    };
+    const onMouseLeave = () => { mouse.active = false; };
+
+    section.addEventListener("mousemove", onMouseMove);
+    section.addEventListener("mouseleave", onMouseLeave);
+    window.addEventListener("resize", init);
 
     const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p) => {
+      ctx.clearRect(0, 0, W, H);
+
+      if (mouse.active) {
+        balls.forEach((b) => {
+          const dx = b.x - mouse.x;
+          const dy = b.y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < MOUSE_RADIUS && dist > 0.01) {
+            const force = (1 - dist / MOUSE_RADIUS) * MOUSE_FORCE;
+            b.vx += (dx / dist) * force;
+            b.vy += (dy / dist) * force;
+          }
+        });
+      }
+
+      for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+          resolveCollision(balls[i], balls[j]);
+        }
+      }
+
+      balls.forEach((b) => {
+        b.vy += GRAVITY;
+        b.x  += b.vx;
+        b.y  += b.vy;
+
+        if (b.x - b.r < 0)  { b.x = b.r;     b.vx =  Math.abs(b.vx) * DAMPING; }
+        if (b.x + b.r > W)  { b.x = W - b.r; b.vx = -Math.abs(b.vx) * DAMPING; }
+        if (b.y - b.r < 0)  { b.y = b.r;     b.vy =  Math.abs(b.vy) * DAMPING; }
+        if (b.y + b.r > H)  { b.y = H - b.r; b.vy = -Math.abs(b.vy) * DAMPING; }
+
+        const spd = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+        if (spd > MAX_SPEED) { b.vx = (b.vx / spd) * MAX_SPEED; b.vy = (b.vy / spd) * MAX_SPEED; }
+
+        const { h, s, l } = b.color;
+        const grad = ctx.createRadialGradient(
+          b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.05,
+          b.x, b.y, b.r
+        );
+        grad.addColorStop(0, `hsla(${h}, ${s}%, ${l + 20}%, ${b.opacity})`);
+        grad.addColorStop(1, `hsla(${h}, ${s}%, ${l}%, ${b.opacity * 0.55})`);
+
+        ctx.save();
+        ctx.shadowBlur  = 16;
+        ctx.shadowColor = `hsla(${h}, ${s}%, ${l}%, 0.55)`;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, 70%, 70%, ${p.opacity})`;
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
         ctx.fill();
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+        ctx.restore();
       });
+
       raf = requestAnimationFrame(draw);
     };
+
+    init();
     draw();
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", init);
+      section.removeEventListener("mousemove", onMouseMove);
+      section.removeEventListener("mouseleave", onMouseLeave);
     };
   }, []);
 
@@ -96,6 +197,7 @@ export default function HeroSection() {
 
   return (
     <section
+      ref={sectionRef}
       style={{
         position: "relative",
         minHeight: "100vh",
@@ -136,11 +238,11 @@ export default function HeroSection() {
           ref={contentRef}
           style={{ textAlign: "center", maxWidth: 820, margin: "0 auto" }}
         >
-          <div className="badge">🛩 Now in Development · Beta Available</div>
+        
 
           <h1
             style={{
-              fontSize: "clamp(2.2rem, 6vw, 4.5rem)",
+              fontSize: "clamp(2.2rem, 6vw, 4.2rem)",
               fontWeight: 900,
               lineHeight: 1.1,
               letterSpacing: "-0.03em",
@@ -163,47 +265,6 @@ export default function HeroSection() {
             TokenPilot counts tokens, scores your prompts, and lets you export
             any AI chat to continue on another platform — in seconds.
           </p>
-
-          {/* Token counter */}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-              background: "rgba(17,17,24,0.8)",
-              border: "1px solid rgba(124,58,237,0.3)",
-              borderRadius: 12,
-              padding: "12px 20px",
-              fontSize: 14,
-              color: "var(--text-muted)",
-              marginBottom: 40,
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                background: "var(--green)",
-                borderRadius: "50%",
-                display: "inline-block",
-                animation: "pulse-dot 1.5s ease-in-out infinite",
-              }}
-            />
-            Live token estimate:
-            <span
-              ref={counterRef}
-              style={{
-                fontSize: 22,
-                fontWeight: 800,
-                color: "var(--purple-light)",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              0
-            </span>
-            tokens
-          </div>
 
           {/* CTA buttons */}
           <div

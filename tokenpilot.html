@@ -235,7 +235,7 @@
     }
 
     .hero-title {
-      font-size: clamp(2.2rem, 6vw, 4.5rem);
+      font-size: clamp(2.2rem, 6vw, 4.2rem);
       font-weight: 900;
       line-height: 1.1;
       letter-spacing: -0.03em;
@@ -1237,52 +1237,149 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    /* ─── Particle Canvas ────────────────────────────────────── */
+    /* ─── Ball Pit Canvas ────────────────────────────────────── */
     (function () {
       const canvas = document.getElementById('particle-canvas');
       const ctx = canvas.getContext('2d');
-      let particles = [];
+      let balls = [];
       let W, H;
+      const mouse = { x: -9999, y: -9999, active: false };
+
+      const COLORS = [
+        { h: 270, s: 70, l: 65 },
+        { h: 190, s: 80, l: 60 },
+        { h: 255, s: 60, l: 75 },
+        { h: 280, s: 65, l: 55 },
+        { h: 200, s: 75, l: 65 },
+      ];
+      const GRAVITY      = 0.22;
+      const DAMPING      = 0.72;
+      const MOUSE_RADIUS = 140;
+      const MOUSE_FORCE  = 9;
+      const BALL_COUNT   = 55;
+      const MAX_SPEED    = 18;
 
       function resize() {
-        W = canvas.width = window.innerWidth;
+        W = canvas.width  = window.innerWidth;
         H = canvas.height = window.innerHeight;
       }
-      resize();
-      window.addEventListener('resize', resize);
 
-      function createParticle() {
+      function createBall() {
+        const r = Math.random() * 10 + 8;
         return {
-          x: Math.random() * W,
-          y: Math.random() * H,
-          r: Math.random() * 2 + 0.5,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          opacity: Math.random() * 0.5 + 0.1,
-          hue: Math.random() > 0.5 ? 270 : 190, // purple or cyan
+          x: Math.random() * (W - r * 2) + r,
+          y: Math.random() * H * 0.65,
+          r,
+          vx: (Math.random() - 0.5) * 3,
+          vy: (Math.random() - 0.5) * 3,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          opacity: Math.random() * 0.3 + 0.55,
         };
       }
 
-      for (let i = 0; i < 80; i++) particles.push(createParticle());
+      function init() {
+        resize();
+        balls = [];
+        for (let i = 0; i < BALL_COUNT; i++) balls.push(createBall());
+      }
+
+      window.addEventListener('resize', init);
+
+      const hero = document.getElementById('hero');
+      hero.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+        mouse.active = true;
+      });
+      hero.addEventListener('mouseleave', () => { mouse.active = false; });
+
+      function resolveCollision(a, b) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = a.r + b.r;
+        if (dist < minDist && dist > 0.01) {
+          const nx = dx / dist;
+          const ny = dy / dist;
+          const overlap = (minDist - dist) * 0.5;
+          a.x -= nx * overlap;
+          a.y -= ny * overlap;
+          b.x += nx * overlap;
+          b.y += ny * overlap;
+          const dot = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+          if (dot > 0) {
+            a.vx -= dot * nx;
+            a.vy -= dot * ny;
+            b.vx += dot * nx;
+            b.vy += dot * ny;
+          }
+        }
+      }
 
       function draw() {
         ctx.clearRect(0, 0, W, H);
-        particles.forEach(p => {
+
+        // Mouse repulsion
+        if (mouse.active) {
+          balls.forEach(b => {
+            const dx = b.x - mouse.x;
+            const dy = b.y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MOUSE_RADIUS && dist > 0.01) {
+              const force = (1 - dist / MOUSE_RADIUS) * MOUSE_FORCE;
+              b.vx += (dx / dist) * force;
+              b.vy += (dy / dist) * force;
+            }
+          });
+        }
+
+        // Ball-ball collisions
+        for (let i = 0; i < balls.length; i++) {
+          for (let j = i + 1; j < balls.length; j++) {
+            resolveCollision(balls[i], balls[j]);
+          }
+        }
+
+        // Physics + draw
+        balls.forEach(b => {
+          b.vy += GRAVITY;
+          b.x  += b.vx;
+          b.y  += b.vy;
+
+          // Wall bounce
+          if (b.x - b.r < 0)  { b.x = b.r;     b.vx =  Math.abs(b.vx) * DAMPING; }
+          if (b.x + b.r > W)  { b.x = W - b.r; b.vx = -Math.abs(b.vx) * DAMPING; }
+          if (b.y - b.r < 0)  { b.y = b.r;     b.vy =  Math.abs(b.vy) * DAMPING; }
+          if (b.y + b.r > H)  { b.y = H - b.r; b.vy = -Math.abs(b.vy) * DAMPING; }
+
+          // Speed cap
+          const spd = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+          if (spd > MAX_SPEED) { b.vx = b.vx / spd * MAX_SPEED; b.vy = b.vy / spd * MAX_SPEED; }
+
+          // Draw with radial gradient + glow
+          const { h, s, l } = b.color;
+          const grad = ctx.createRadialGradient(
+            b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.05,
+            b.x, b.y, b.r
+          );
+          grad.addColorStop(0, `hsla(${h}, ${s}%, ${l + 20}%, ${b.opacity})`);
+          grad.addColorStop(1, `hsla(${h}, ${s}%, ${l}%,     ${b.opacity * 0.55})`);
+
+          ctx.save();
+          ctx.shadowBlur  = 16;
+          ctx.shadowColor = `hsla(${h}, ${s}%, ${l}%, 0.55)`;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${p.hue}, 70%, 70%, ${p.opacity})`;
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
           ctx.fill();
-
-          p.x += p.vx;
-          p.y += p.vy;
-
-          if (p.x < 0) p.x = W;
-          if (p.x > W) p.x = 0;
-          if (p.y < 0) p.y = H;
-          if (p.y > H) p.y = 0;
+          ctx.restore();
         });
+
         requestAnimationFrame(draw);
       }
+
+      init();
       draw();
     })();
 

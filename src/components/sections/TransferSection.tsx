@@ -112,7 +112,6 @@ export default function TransferSection() {
           className="t-reveal"
           style={{
             display: "flex",
-            alignItems: "center",
             justifyContent: "center",
             flexWrap: "nowrap",
             gap: 0,
