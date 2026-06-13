@@ -3,6 +3,24 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { CHROME_STORE_URL } from "@/app/page";
+
+const CHANGELOG = [
+  {
+    version: "3.5",
+    label: "Latest",
+    highlights: [
+      "Send Chat to Another AI — pick target, auto-open new tab, auto-paste & submit.",
+      "Falls back to clipboard when a target site blocks programmatic paste.",
+      "Available from the toolbar popup and the on-page widget's Transfer tab.",
+      "In-page toast confirms status (pasted, submitted, or manual-paste needed).",
+    ],
+  },
+  {
+    version: "3.4",
+    highlights: ["Download chat as .md export.", "Prompt scorer & history."],
+  },
+];
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,7 +46,7 @@ export default function CTASection() {
       id="cta"
       style={{ padding: "120px 0", textAlign: "center" }}
     >
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
         <div className="badge cta-item" style={{ justifyContent: "center" }}>
           🚀 Free Forever
         </div>
@@ -71,7 +89,7 @@ export default function CTASection() {
             padding: "6px 14px",
             fontSize: 12,
             color: "var(--text-dim)",
-            marginBottom: 40,
+            marginBottom: 32,
           }}
         >
           <span
@@ -82,7 +100,7 @@ export default function CTASection() {
               display: "inline-block",
             }}
           />
-          v3.4 — Latest · Active Development
+          v3.5 — Latest · Active Development
         </div>
 
         {/* Buttons */}
@@ -94,8 +112,29 @@ export default function CTASection() {
             justifyContent: "center",
             gap: 16,
             flexWrap: "wrap",
+            marginBottom: 64,
           }}
         >
+          <a
+            href={CHROME_STORE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-pulse"
+            style={{
+              fontSize: 15,
+              padding: "16px 32px",
+              background: "linear-gradient(135deg, var(--purple), #6d28d9)",
+              color: "#fff",
+              borderRadius: 10,
+              fontWeight: 700,
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            Install Free — Chrome
+          </a>
           <a
             href="https://github.com/kushpatel-dev/TokenPilot"
             target="_blank"
@@ -116,6 +155,99 @@ export default function CTASection() {
             </svg>
             View on GitHub
           </a>
+        </div>
+
+        {/* Changelog */}
+        <div
+          className="cta-item"
+          style={{
+            maxWidth: 640,
+            margin: "0 auto",
+            textAlign: "left",
+            display: "grid",
+            gap: 20,
+          }}
+        >
+          {CHANGELOG.map((entry, i) => (
+            <div
+              key={entry.version}
+              style={{
+                padding: 20,
+                borderRadius: 14,
+                background: i === 0 ? "rgba(124,58,237,0.08)" : "var(--surface2)",
+                border: `1px solid ${i === 0 ? "rgba(124,58,237,0.35)" : "rgba(255,255,255,0.05)"}`,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 12,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: i === 0 ? "var(--purple-light)" : "var(--text)",
+                  }}
+                >
+                  {i === 0 ? `What's new in v${entry.version}` : `v${entry.version}`}
+                </span>
+                {entry.label && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: "2px 8px",
+                      borderRadius: 9999,
+                      background: "var(--purple)",
+                      color: "#fff",
+                      letterSpacing: "0.04em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {entry.label}
+                  </span>
+                )}
+              </div>
+              <ul
+                style={{
+                  margin: 0,
+                  padding: 0,
+                  listStyle: "none",
+                  display: "grid",
+                  gap: 8,
+                }}
+              >
+                {entry.highlights.map((h, j) => (
+                  <li
+                    key={j}
+                    style={{
+                      fontSize: 13,
+                      color: "var(--text-muted)",
+                      lineHeight: 1.6,
+                      paddingLeft: 18,
+                      position: "relative",
+                    }}
+                  >
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        color: i === 0 ? "var(--purple-light)" : "var(--text-dim)",
+                      }}
+                    >
+                      ›
+                    </span>
+                    {h}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
     </section>

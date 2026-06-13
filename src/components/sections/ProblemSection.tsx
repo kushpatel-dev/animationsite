@@ -53,7 +53,7 @@ export default function ProblemSection() {
       id="problem"
       style={{ background: "var(--surface)", padding: "100px 0" }}
     >
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
         <div className="badge">The Problem</div>
         <h2
           style={{
@@ -64,7 +64,7 @@ export default function ProblemSection() {
             marginBottom: 16,
           }}
         >
-          AI users lose context every time they switch platforms
+         Switching AI tools often breaks context.
         </h2>
         <p
           style={{

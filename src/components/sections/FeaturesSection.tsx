@@ -19,8 +19,8 @@ const FEATURES = [
   },
   {
     icon: "🚀",
-    title: "Chat Transfer",
-    desc: "Export any conversation as a structured .md file. Open it on ChatGPT, Gemini, Claude, Perplexity and 5 more platforms instantly.",
+    title: "Send Chat to Another AI",
+    desc: "New in v3.5 — pick a target AI, TokenPilot opens a new tab and auto-pastes the full conversation. Works on ChatGPT, Claude, Gemini, AI Studio, Perplexity, Mistral, DeepSeek. .md export still available.",
   },
   {
     icon: "📚",
@@ -69,7 +69,7 @@ export default function FeaturesSection() {
 
   return (
     <section id="features" style={{ padding: "100px 0" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
         <div className="badge">Core Features</div>
         <h2
           style={{

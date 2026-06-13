@@ -29,7 +29,7 @@ export default function BenchmarksSection() {
 
   return (
     <section id="benchmarks" style={{ padding: "100px 0" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
         <div className="badge">Accuracy</div>
         <h2
           style={{

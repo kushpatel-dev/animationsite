@@ -7,7 +7,25 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const PLATFORMS = [
-  "ChatGPT","Gemini","Claude","Perplexity","Mistral","DeepSeek","AI Studio","Copilot","Arena.ai",
+  "ChatGPT","Claude","Gemini","AI Studio","Perplexity","Mistral","DeepSeek",
+];
+
+const STEPS = [
+  {
+    n: "1",
+    title: "Pick a target AI",
+    desc: "Choose ChatGPT, Claude, Gemini, AI Studio, Perplexity, Mistral or DeepSeek from the dropdown.",
+  },
+  {
+    n: "2",
+    title: "Auto-open new tab",
+    desc: "TokenPilot scrapes the current conversation and opens the target AI in a fresh tab.",
+  },
+  {
+    n: "3",
+    title: "Auto-paste & submit",
+    desc: "Full transcript is pasted into the composer and submitted. Falls back to clipboard if blocked.",
+  },
 ];
 
 function Arrow() {
@@ -86,8 +104,8 @@ export default function TransferSection() {
       id="transfer"
       style={{ background: "var(--surface)", padding: "100px 0", overflow: "hidden" }}
     >
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
-        <div className="badge t-reveal">Chat Transfer</div>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
+        <div className="badge t-reveal">Transfer chats across AIs</div>
         <h2
           className="t-reveal"
           style={{
@@ -98,14 +116,68 @@ export default function TransferSection() {
             marginBottom: 16,
           }}
         >
-          Move your entire AI conversation in one click
+          Continue any conversation in any AI. One click.
         </h2>
         <p
           className="t-reveal"
-          style={{ fontSize: "1.1rem", color: "var(--text-muted)", maxWidth: 540, marginBottom: 60 }}
+          style={{ fontSize: "1.1rem", color: "var(--text-muted)", maxWidth: 600, marginBottom: 40 }}
         >
-          From any platform to any platform. Context intact.
+          Works with ChatGPT, Claude, Gemini, AI Studio, Perplexity, Mistral, DeepSeek.
         </p>
+
+        {/* Three-step flow */}
+        <div
+          className="t-reveal"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 16,
+            marginBottom: 56,
+          }}
+        >
+          {STEPS.map((s) => (
+            <div
+              key={s.n}
+              style={{
+                padding: 24,
+                borderRadius: 14,
+                background: "var(--surface2)",
+                border: "1px solid rgba(124,58,237,0.2)",
+              }}
+            >
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: "rgba(124,58,237,0.18)",
+                  color: "var(--purple-light)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 800,
+                  fontSize: 14,
+                  marginBottom: 14,
+                }}
+              >
+                {s.n}
+              </div>
+              <h3
+                style={{
+                  fontSize: 15,
+                  fontWeight: 700,
+                  marginBottom: 8,
+                  color: "var(--text)",
+                }}
+              >
+                {s.title}
+              </h3>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                {s.desc}
+              </p>
+            </div>
+          ))}
+        </div>
 
         {/* Flow diagram */}
         <div
@@ -122,11 +194,11 @@ export default function TransferSection() {
           {[
             { label: "ChatGPT", sub: "Source", style: {} },
             null,
-            { label: "TokenPilot", sub: "Export", style: { background: "rgba(124,58,237,0.12)", borderColor: "rgba(124,58,237,0.5)", color: "var(--purple-light)" } },
+            { label: "TokenPilot\nSend to AI ▾", sub: "Pick target", style: { background: "rgba(124,58,237,0.12)", borderColor: "rgba(124,58,237,0.5)", color: "var(--purple-light)" } },
             null,
-            { label: "chat.md\netm: 4.2K tokens", sub: ".md file", style: { background: "rgba(34,211,238,0.08)", borderColor: "rgba(34,211,238,0.3)", color: "var(--cyan)", fontFamily: "monospace", fontSize: 11 } },
+            { label: "New tab\nauto-paste", sub: "v3.5 flow", style: { background: "rgba(34,211,238,0.08)", borderColor: "rgba(34,211,238,0.3)", color: "var(--cyan)", fontFamily: "monospace", fontSize: 11 } },
             null,
-            { label: "Open on →", sub: "Destination", style: { background: "rgba(124,58,237,0.12)", borderColor: "rgba(124,58,237,0.5)", color: "var(--purple-light)" } },
+            { label: "Claude", sub: "Destination", style: { background: "rgba(124,58,237,0.12)", borderColor: "rgba(124,58,237,0.5)", color: "var(--purple-light)" } },
           ].map((node, i) =>
             node === null ? (
               <Arrow key={i} />
@@ -234,7 +306,7 @@ export default function TransferSection() {
             >
               🛩 TokenPilot
             </span>
-            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>v3.4</span>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>v3.5</span>
           </div>
           {[
             ["Session tokens", "4,218"],
@@ -257,20 +329,56 @@ export default function TransferSection() {
           ))}
           <div
             style={{
-              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
               marginTop: 14,
+              padding: "10px 12px",
+              background: "var(--surface)",
+              border: "1px solid rgba(124,58,237,0.35)",
+              borderRadius: 8,
+              fontSize: 12,
+              color: "var(--text-muted)",
+              fontWeight: 500,
+            }}
+          >
+            <span>Send to</span>
+            <span style={{ color: "var(--purple-light)", fontWeight: 700 }}>
+              Claude ▾
+            </span>
+          </div>
+          <div
+            style={{
+              width: "100%",
+              marginTop: 8,
               padding: 10,
               background: "linear-gradient(135deg, var(--purple), #6d28d9)",
               border: "none",
               borderRadius: 8,
               color: "#fff",
               fontSize: 13,
-              fontWeight: 600,
+              fontWeight: 700,
               textAlign: "center",
               cursor: "pointer",
             }}
           >
-            ⬆ Export as .md — Transfer Chat
+            ➤ Send Chat to Another AI
+          </div>
+          <div
+            style={{
+              marginTop: 8,
+              padding: 8,
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 8,
+              color: "var(--text-dim)",
+              fontSize: 11,
+              fontWeight: 500,
+              textAlign: "center",
+            }}
+          >
+            ⬇ Download as .md
           </div>
         </div>
       </div>

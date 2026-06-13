@@ -1,3 +1,6 @@
+// TODO: replace with the public Chrome Web Store listing URL once approved.
+export const CHROME_STORE_URL = "https://chrome.google.com/webstore/detail/tokenpilot/TODO";
+
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/sections/HeroSection";

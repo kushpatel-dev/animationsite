@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 
 export default function HeroSection() {
@@ -43,8 +44,8 @@ export default function HeroSection() {
     const mouse = { x: -9999, y: -9999, active: false };
 
     const resize = () => {
-      W = canvas.width  = window.innerWidth;
-      H = canvas.height = window.innerHeight;
+      W = canvas.width  = section.clientWidth;
+      H = canvas.height = section.clientHeight;
     };
 
     const createBall = (): Ball => {
@@ -232,13 +233,41 @@ export default function HeroSection() {
 
       <div
         data-hero-exit
-        style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", width: "100%", zIndex: 1 }}
+        style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", width: "100%", zIndex: 1 }}
       >
         <div
           ref={contentRef}
           style={{ textAlign: "center", maxWidth: 820, margin: "0 auto" }}
         >
-        
+          <div
+            className="badge"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 20,
+              background: "rgba(124,58,237,0.12)",
+              border: "1px solid rgba(124,58,237,0.4)",
+              color: "var(--purple-light)",
+              borderRadius: 9999,
+              padding: "6px 14px",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                background: "var(--green)",
+                borderRadius: "50%",
+                display: "inline-block",
+              }}
+            />
+            New in v3.5 · Send Chat to Another AI
+          </div>
 
           <h1
             style={{
@@ -249,38 +278,36 @@ export default function HeroSection() {
               marginBottom: 24,
             }}
           >
-            Stop losing your AI conversations.{" "}
-            <span className="gradient-text">Transfer them anywhere.</span>
+            Send any AI chat to any other AI.{" "}
+            <span className="gradient-text">One click.</span>
           </h1>
 
           <p
             style={{
               fontSize: "clamp(1rem, 2vw, 1.2rem)",
               color: "var(--text-muted)",
-              maxWidth: 560,
+              maxWidth: 620,
               margin: "0 auto 40px",
               lineHeight: 1.7,
             }}
           >
-            TokenPilot counts tokens, scores your prompts, and lets you export
-            any AI chat to continue on another platform — in seconds.
+           Jump between AI tools without losing context.
           </p>
 
-          {/* CTA buttons */}
+          {/* CTA button */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 16,
-              flexWrap: "wrap",
+              marginBottom: 56,
             }}
           >
             <a
               href="https://github.com/kushpatel-dev/TokenPilot"
               target="_blank"
               rel="noreferrer"
-              className="btn btn-ghost btn-pulse"
+              className="btn btn-ghost"
               style={{ border: "1px solid rgba(124,58,237,0.4)", color: "var(--purple-light)", display: "inline-flex", alignItems: "center", gap: 8 }}
             >
               <svg height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -290,6 +317,27 @@ export default function HeroSection() {
             </a>
           </div>
 
+          {/* v3.5 screenshot placeholder */}
+          <div
+            style={{
+              maxWidth: "60%",
+              margin: "0 auto",
+              borderRadius: 16,
+              overflow: "hidden",
+              border: "1px solid rgba(124,58,237,0.3)",
+              boxShadow: "0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(124,58,237,0.15)",
+              background: "var(--surface2)",
+            }}
+          >
+            <Image
+              src="/screenshots/version3:5.jpeg"
+              alt="TokenPilot v3.5 — Send Chat to Another AI"
+              width={1520}
+              height={900}
+              priority
+              style={{ width: "100%", height: "auto", display: "block" }}
+            />
+          </div>
         </div>
       </div>
 

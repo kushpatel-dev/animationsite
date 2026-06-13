@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { CHROME_STORE_URL } from "@/app/page";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -53,7 +54,7 @@ export default function Navbar() {
       >
         <div
           style={{
-            maxWidth: 1200,
+            maxWidth: 1280,
             margin: "0 auto",
             padding: "0 24px",
             display: "flex",
@@ -105,7 +106,9 @@ export default function Navbar() {
               </a>
             ))}
             <a
-              href="#cta"
+              href={CHROME_STORE_URL}
+              target="_blank"
+              rel="noreferrer"
               style={{
                 background: "var(--purple)",
                 color: "#fff",
@@ -157,7 +160,7 @@ export default function Navbar() {
             gap: 36,
           }}
         >
-          {[...NAV_LINKS, { label: "Install Free", href: "#cta" }].map((l) => (
+          {[...NAV_LINKS, { label: "Install Free", href: CHROME_STORE_URL }].map((l) => (
             <a
               key={l.label}
               href={l.href}
