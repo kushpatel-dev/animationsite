@@ -15,6 +15,7 @@ const SITE_DESCRIPTION =
 export const metadata: Metadata = {
   title: "TokenPilot — Manage Tokens. Transfer AI Chats. Stay in Control.",
   description: SITE_DESCRIPTION,
+  icons: { icon: "/icon48_1.png" },
   openGraph: {
     title: "TokenPilot — One-click AI chat transfer",
     description: SITE_DESCRIPTION,
